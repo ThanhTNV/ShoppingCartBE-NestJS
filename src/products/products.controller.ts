@@ -12,15 +12,24 @@ import {
   NotImplementedException,
   UsePipes,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import {
+  CreateProductDto,
+  CreateProductInstanceDto,
+} from './dto/create-product.dto';
+import {
+  UpdateProductDto,
+  UpdateProductInstanceDto,
+} from './dto/update-product.dto';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CategoriesService } from './categories.service';
 import { Category } from 'src/database/models/schemas/categories.schemas';
 import { ValidateParamsPipe } from 'src/utils/paramsValidation.pipe';
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ValidateQueryPipe } from 'src/utils/querysValidation.pipe';
+import { ProductInstance } from 'src/database/models/schemas/products.schemas';
 
 @Controller('products')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -46,17 +55,42 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Product ID(MongoDB ObjectId)',
+  })
+  @ApiQuery({
+    name: 'product_instance_id',
+    required: false,
+    type: String,
+    description: 'Product Instance ID(MongoDB ObjectId)',
+  })
   @ApiResponse({ status: 200, description: 'Product found' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
-  async findOne(@Param('id', new ValidateParamsPipe()) id: string) {
-    const result = await this.productsService.findProduct(id);
-    if (!result) {
+  async findOne(
+    @Param('id', new ValidateParamsPipe()) id: string,
+    @Query('product_instance_id', new ValidateQueryPipe())
+    product_instance_id?: string,
+  ) {
+    const product = await this.productsService.findProduct(id);
+    if (!product) {
       throw new UnprocessableEntityException('Product not found');
     }
-    const productInstances =
-      await this.productsService.findAllProductInstances(id);
-    return { ...result, productInstances };
+    if (!product_instance_id) {
+      const productInstances =
+        await this.productsService.findAllProductInstances(id);
+      return { ...product, productInstances };
+    } else {
+      const productInstance = await this.productsService.findProductInstance({
+        product_id: id,
+        _id: product_instance_id,
+      });
+      if (!productInstance) {
+        throw new UnprocessableEntityException('Product not found');
+      }
+      return productInstance;
+    }
   }
 
   @Post()
@@ -82,8 +116,76 @@ export class ProductsController {
     return await this.productsService.insertProduct(createProductDto);
   }
 
+  @Post(':id')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Product ID(MongoDB ObjectId)',
+  })
+  @ApiBody({
+    type: CreateProductInstanceDto,
+    description: 'Product Instance Data',
+  })
+  async createItem(
+    @Param('id', new ValidateParamsPipe()) id: string,
+    @Body('productInstance') productInstance: CreateProductInstanceDto,
+  ) {
+    const isExists = await this.productsService.findProduct(id);
+    if (!isExists) {
+      throw new UnprocessableEntityException('Product not found');
+    }
+    const isExistsInstance =
+      await this.productsService.findExistProductInstance({
+        product_id: id,
+        productInstance,
+      });
+    if (isExistsInstance) {
+      throw new UnprocessableEntityException('Product Instance already exists');
+    }
+    const result = await this.productsService.insertProductInstance({
+      product_id: id,
+      productInstance: productInstance,
+    });
+    return result;
+  }
+
+  @Patch('instance/:id')
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Product Instance ID(MongoDB ObjectId)',
+  })
+  @ApiBody({
+    type: UpdateProductInstanceDto,
+    description: 'Product Instance Data',
+  })
+  @ApiResponse({ status: 200, description: 'Product updated' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
+  async updateItem(
+    @Param('id', new ValidateParamsPipe()) product_instance_id: string,
+    @Body() updateProductInstanceDto: UpdateProductInstanceDto,
+  ) {
+    const isExists = await this.productsService.findProductInstance({
+      _id: product_instance_id,
+    });
+    if (!isExists) {
+      throw new NotFoundException('Product not found');
+    }
+    if (Object.keys(updateProductInstanceDto).length === 0) {
+      throw new UnprocessableEntityException('Invalid data');
+    }
+    return await this.productsService.updateProductInstance({
+      id: product_instance_id,
+      updateProductInstanceDto,
+    });
+  }
+
   @Patch(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Product ID(MongoDB ObjectId)',
+  })
   @ApiBody({ type: UpdateProductDto })
   @ApiResponse({ status: 200, description: 'Product updated' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
@@ -116,7 +218,11 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Product ID(MongoDB ObjectId)',
+  })
   remove(@Param('id') id: string) {
     throw new NotImplementedException('Method not implemented.');
   }

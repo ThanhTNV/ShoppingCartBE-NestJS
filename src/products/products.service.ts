@@ -88,29 +88,32 @@ export class ProductsService {
   }
 
   async findProductInstance({
+    _id,
     product_id,
-    product_instance_id,
   }: {
-    product_id: string;
-    product_instance_id: string;
+    _id: string;
+    product_id?: string;
   }) {
-    const result = await this.database.product_instances.findOne({
-      _id: new ObjectId(product_instance_id),
+    if (!product_id) {
+      return await this.database.product_instances.findOne({
+        _id: new ObjectId(_id),
+      });
+    }
+    return await this.database.product_instances.findOne({
+      _id: new ObjectId(_id),
       product_id: new ObjectId(product_id),
     });
-
-    return result;
   }
 
-  async findNameOfProductInstance({
+  async findExistProductInstance({
     product_id,
-    name,
+    productInstance,
   }: {
     product_id: string;
-    name: string;
+    productInstance: CreateProductInstanceDto;
   }) {
     const result = await this.database.product_instances.findOne({
-      name,
+      ...productInstance,
       product_id: new ObjectId(product_id),
     });
 

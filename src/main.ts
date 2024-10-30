@@ -5,7 +5,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception-filter/http
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  // app.enableCors();
   app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
     .setTitle('Shopping Cart API')

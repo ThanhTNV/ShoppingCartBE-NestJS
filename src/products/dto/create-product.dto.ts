@@ -62,7 +62,7 @@ export class CreateProductInstanceDto {
     required: true,
     name: 'name',
     description: 'Name of the product',
-    example: 'Product Name',
+    example: 'Iphone 15 Pro Max',
     type: 'string',
   })
   @IsNotEmpty({ message: 'name must not be empty' })
@@ -73,7 +73,7 @@ export class CreateProductInstanceDto {
     required: true,
     name: 'price',
     description: 'Price of the product',
-    example: 100.0,
+    example: 100.25,
     type: 'number',
   })
   @IsNotEmpty({ message: 'price must not be empty' })
@@ -87,7 +87,7 @@ export class CreateProductInstanceDto {
     required: true,
     name: 'color',
     description: 'Color of the product',
-    example: 'Product Color',
+    example: 'Red',
     type: 'string',
   })
   @IsNotEmpty({ message: 'color must not be empty' })

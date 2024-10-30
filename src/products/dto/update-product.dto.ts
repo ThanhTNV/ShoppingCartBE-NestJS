@@ -47,12 +47,12 @@ export class UpdateProductInstanceDto extends PartialType(
 ) {
   @ApiProperty({
     required: false,
-    name: 'product_id',
-    description: 'Product ID',
-    example: 'Product ID',
+    name: 'name',
+    description: 'Product Name',
+    example: 'Iphone 15 Pro Max',
     type: 'string',
   })
-  @IsString({ message: 'product_id is invalid' })
+  @IsString({ message: 'Product name is invalid' })
   name: string;
 
   @ApiProperty({
@@ -72,7 +72,7 @@ export class UpdateProductInstanceDto extends PartialType(
     required: false,
     name: 'color',
     description: 'Product Color',
-    example: 'Product Color',
+    example: 'Red',
     type: 'string',
   })
   @IsString({ message: 'color is invalid' })

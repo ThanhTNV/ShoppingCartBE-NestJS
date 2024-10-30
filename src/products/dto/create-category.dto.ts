@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty({
@@ -25,12 +25,13 @@ export class CreateCategoryDto {
   description: string;
 
   @ApiProperty({
-    required: true,
+    required: false,
     name: 'parents',
     description: 'Parents of the category',
     example: 'Parents',
     type: 'string',
   })
+  @IsOptional()
   @IsString({ message: 'parents_id is invalid' })
   parents: string;
 }
