@@ -3,17 +3,17 @@ import {
   CreateProductDto,
   CreateProductInstanceDto,
 } from './create-product.dto';
-import {
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Matches,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsString, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {
+  @ApiProperty({
+    required: false,
+    name: 'category_id',
+    description: 'Categories of the product',
+    example: 'Product Name',
+    type: 'array',
+  })
   @IsArray({ message: 'category_id must be an array of strings' })
   @Matches(/^[0-9a-fA-F]{24}$/, {
     each: true,
@@ -21,9 +21,23 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   })
   category_id: string[];
 
+  @ApiProperty({
+    required: false,
+    name: 'model',
+    description: 'Product Model',
+    example: 'Product Model',
+    type: 'string',
+  })
   @IsString({ message: 'model is invalid' })
   model: string;
 
+  @ApiProperty({
+    required: false,
+    name: 'description',
+    description: 'Product Description',
+    example: 'Product Description',
+    type: 'string',
+  })
   @IsString({ message: 'description is invalid' })
   description: string;
 }
@@ -31,18 +45,46 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
 export class UpdateProductInstanceDto extends PartialType(
   CreateProductInstanceDto,
 ) {
+  @ApiProperty({
+    required: false,
+    name: 'product_id',
+    description: 'Product ID',
+    example: 'Product ID',
+    type: 'string',
+  })
   @IsString({ message: 'product_id is invalid' })
   name: string;
 
+  @ApiProperty({
+    required: false,
+    name: 'price',
+    description: 'Product Price',
+    example: 100,
+    type: 'number',
+  })
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: 'price is invalid. 2 digits max after decimal point' },
   )
   price: number;
 
+  @ApiProperty({
+    required: false,
+    name: 'color',
+    description: 'Product Color',
+    example: 'Product Color',
+    type: 'string',
+  })
   @IsString({ message: 'color is invalid' })
   color: string;
 
+  @ApiProperty({
+    required: false,
+    name: 'stock',
+    description: 'Product quantity',
+    example: 100,
+    type: 'number',
+  })
   @IsNumber(
     { maxDecimalPlaces: 0 },
     { message: 'stock is invalid. Stock must be an integer' },

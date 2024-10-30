@@ -12,7 +12,10 @@ export class ValidateParamsPipe implements PipeTransform {
     if (metadata.type === 'param') {
       if (metadata.data === 'id') {
         if (!value.match(ObjectIdRegex)) {
-          throw new UnprocessableEntityException('Invalid ID', 'ID must be a valid MongoDB ObjectId');
+          throw new UnprocessableEntityException(
+            'Invalid ID',
+            'ID must be a valid MongoDB ObjectId',
+          );
         }
       }
     }
