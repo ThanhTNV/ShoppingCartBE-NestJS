@@ -12,7 +12,7 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     name: 'category_id',
     description: 'Categories of the product',
     example: 'Product Name',
-    type: 'array',
+    type: [String],
   })
   @IsArray({ message: 'category_id must be an array of strings' })
   @Matches(/^[0-9a-fA-F]{24}$/, {

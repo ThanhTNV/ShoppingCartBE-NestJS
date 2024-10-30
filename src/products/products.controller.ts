@@ -20,6 +20,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CategoriesService } from './categories.service';
 import { Category } from 'src/database/models/schemas/categories.schemas';
 import { ValidateParamsPipe } from 'src/utils/paramsValidation.pipe';
+import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('products')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -31,6 +32,7 @@ export class ProductsController {
   ) {}
 
   @Get()
+  @ApiResponse({ status: 200, description: 'Products found' })
   async findAll() {
     const products = await this.productsService.findAllProducts();
     const products_id = products.map(({ _id }) => _id.toString());
@@ -44,6 +46,9 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
+  @ApiResponse({ status: 200, description: 'Product found' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
   async findOne(@Param('id', new ValidateParamsPipe()) id: string) {
     const result = await this.productsService.findProduct(id);
     if (!result) {
@@ -55,6 +60,9 @@ export class ProductsController {
   }
 
   @Post()
+  @ApiBody({ type: CreateProductDto, description: 'Product Data' })
+  @ApiResponse({ status: 201, description: 'Product created' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
   async create(
     @Body()
     createProductDto: CreateProductDto,
@@ -75,6 +83,10 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
+  @ApiBody({ type: UpdateProductDto })
+  @ApiResponse({ status: 200, description: 'Product updated' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
   async update(
     @Param('id', new ValidateParamsPipe()) id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -104,6 +116,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'id', type: String, description: 'Product ID(MongoDB ObjectId)' })
   remove(@Param('id') id: string) {
     throw new NotImplementedException('Method not implemented.');
   }
