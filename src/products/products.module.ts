@@ -5,6 +5,8 @@ import { GuardModule } from 'src/common/guards/guard.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from 'src/database/database.module';
+import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './categories.service';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import { DatabaseModule } from 'src/database/database.module';
     }),
     DatabaseModule,
   ],
-  controllers: [ProductsController],
-  providers: [ProductsService],
+  controllers: [ProductsController, CategoriesController],
+  providers: [ProductsService, CategoriesService],
 })
 export class ProductsModule {}
