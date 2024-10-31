@@ -5,6 +5,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { CryptoService } from 'src/utils/crypto.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class UsersService {
@@ -71,6 +72,13 @@ export class UsersService {
 
   async checkEmailExists(email: string) {
     const user = await this.databaseService.users.findOne({ email });
+    return Boolean(user);
+  }
+
+  async checkUserExists(user_id: string) {
+    const user = await this.databaseService.users.findOne({
+      _id: new ObjectId(user_id),
+    });
     return Boolean(user);
   }
 }

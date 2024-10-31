@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [DatabaseModule, UtilsModule, JwtModule],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

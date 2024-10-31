@@ -27,11 +27,18 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { CategoriesService } from './categories.service';
 import { Category } from 'src/database/models/schemas/categories.schemas';
 import { ValidateParamsPipe } from 'src/utils/paramsValidation.pipe';
-import { ApiBody, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ValidateQueryPipe } from 'src/utils/querysValidation.pipe';
 import { ProductInstance } from 'src/database/models/schemas/products.schemas';
 
 @Controller('products')
+@ApiTags('Products')
 @UsePipes(new ValidationPipe({ transform: true }))
 // @UseGuards(AuthGuard)
 export class ProductsController {
@@ -67,6 +74,7 @@ export class ProductsController {
     description: 'Product Instance ID(MongoDB ObjectId)',
   })
   @ApiResponse({ status: 200, description: 'Product found' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
   async findOne(
     @Param('id', new ValidateParamsPipe()) id: string,
@@ -75,7 +83,7 @@ export class ProductsController {
   ) {
     const product = await this.productsService.findProduct(id);
     if (!product) {
-      throw new UnprocessableEntityException('Product not found');
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
     if (!product_instance_id) {
       const productInstances =
@@ -87,7 +95,9 @@ export class ProductsController {
         _id: product_instance_id,
       });
       if (!productInstance) {
-        throw new UnprocessableEntityException('Product not found');
+        throw new NotFoundException(
+          `Product instance with ID ${product_instance_id} not found`,
+        );
       }
       return productInstance;
     }
@@ -96,6 +106,7 @@ export class ProductsController {
   @Post()
   @ApiBody({ type: CreateProductDto, description: 'Product Data' })
   @ApiResponse({ status: 201, description: 'Product created' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
   async create(
     @Body()
@@ -111,7 +122,12 @@ export class ProductsController {
     );
     const isNotExists = Categories.some((category) => !category);
     if (isNotExists) {
-      throw new UnprocessableEntityException('Category not found');
+      const category_id_not_found = Categories.find(
+        (category) => !category,
+      )._id.toString();
+      throw new NotFoundException(
+        `Category with ID ${category_id_not_found} not found`,
+      );
     }
     return await this.productsService.insertProduct(createProductDto);
   }
@@ -126,13 +142,16 @@ export class ProductsController {
     type: CreateProductInstanceDto,
     description: 'Product Instance Data',
   })
+  @ApiResponse({ status: 201, description: 'Product Instance created' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
   async createItem(
     @Param('id', new ValidateParamsPipe()) id: string,
     @Body('productInstance') productInstance: CreateProductInstanceDto,
   ) {
     const isExists = await this.productsService.findProduct(id);
     if (!isExists) {
-      throw new UnprocessableEntityException('Product not found');
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
     const isExistsInstance =
       await this.productsService.findExistProductInstance({
@@ -160,6 +179,7 @@ export class ProductsController {
     description: 'Product Instance Data',
   })
   @ApiResponse({ status: 200, description: 'Product updated' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
   async updateItem(
     @Param('id', new ValidateParamsPipe()) product_instance_id: string,
@@ -169,7 +189,9 @@ export class ProductsController {
       _id: product_instance_id,
     });
     if (!isExists) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException(
+        `Product with ID ${product_instance_id} not found`,
+      );
     }
     if (Object.keys(updateProductInstanceDto).length === 0) {
       throw new UnprocessableEntityException('Invalid data');
@@ -188,6 +210,7 @@ export class ProductsController {
   })
   @ApiBody({ type: UpdateProductDto })
   @ApiResponse({ status: 200, description: 'Product updated' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   @ApiResponse({ status: 422, description: 'Invalid input' })
   async update(
     @Param('id', new ValidateParamsPipe()) id: string,
@@ -196,7 +219,7 @@ export class ProductsController {
     const { category_id } = updateProductDto;
     const isExists = await this.productsService.findProduct(id);
     if (!isExists) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException(`Product with ID ${id} not found`);
     }
     if (Object.keys(updateProductDto).length === 0) {
       throw new UnprocessableEntityException('Invalid data');
@@ -207,7 +230,12 @@ export class ProductsController {
       );
       const isNotExists = Categories.some((category) => !category);
       if (isNotExists) {
-        throw new UnprocessableEntityException('Category not found');
+        const category_id_not_found = Categories.find(
+          (category) => !category,
+        )._id.toString();
+        throw new NotFoundException(
+          `Category with ID ${category_id_not_found} not found`,
+        );
       }
     } else {
       updateProductDto.category_id = isExists.category_id.map((id) =>

@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Product, ProductInstance } from './models/schemas/products.schemas';
 import { Category } from './models/schemas/categories.schemas';
+import { Order, OrderItem } from './models/schemas/orders.schemas';
 @Injectable()
 export class DatabaseService {
   private client: MongoClient;
@@ -35,5 +36,13 @@ export class DatabaseService {
 
   get categories(): Collection<Category> {
     return this.db.collection(process.env.DB_CATEGORIES_COLLECTION);
+  }
+
+  get orders(): Collection<Order> {
+    return this.db.collection(process.env.DB_ORDERS_COLLECTION);
+  }
+
+  get order_items(): Collection<OrderItem> {
+    return this.db.collection(process.env.DB_ORDER_ITEMS_COLLECTION);
   }
 }

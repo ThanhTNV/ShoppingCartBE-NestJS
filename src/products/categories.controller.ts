@@ -15,9 +15,10 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ValidateParamsPipe } from 'src/utils/paramsValidation.pipe';
-import { ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('categories')
+@ApiTags('Categories')
 @UsePipes(new ValidationPipe({ transform: true }))
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
@@ -29,7 +30,11 @@ export class CategoriesController {
   }
 
   @Get(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Category ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Category ID(MongoDB ObjectId)',
+  })
   @ApiResponse({ status: 200, description: 'Category found' })
   @ApiResponse({ status: 404, description: 'Category not found' })
   async findCategory(@Param('id', new ValidateParamsPipe()) id: string) {
@@ -54,7 +59,11 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Category ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Category ID(MongoDB ObjectId)',
+  })
   @ApiBody({ type: UpdateCategoryDto, description: 'Category Data' })
   @ApiResponse({ status: 200, description: 'Category updated' })
   @ApiResponse({ status: 404, description: 'Category not found' })
@@ -87,7 +96,14 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @ApiParam({ name: 'id', type: String, description: 'Category ID(MongoDB ObjectId)' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Category ID(MongoDB ObjectId)',
+  })
+  @ApiResponse({ status: 200, description: 'Category deleted' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @ApiResponse({ status: 422, description: 'Invalid input' })
   async deleteCategory(@Param('id', new ValidateParamsPipe()) id: string) {
     const isExists = await this.categoriesService.findCategory(id);
     if (!isExists) {

@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   const config = new DocumentBuilder()
     .setTitle('Shopping Cart API')
-    .setDescription('Shopping Cart API Description')
+    .setDescription('Shopping Cart API list, built with NestJS')
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
